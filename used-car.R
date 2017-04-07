@@ -69,15 +69,14 @@ trainsetY = trainset$price
 #linearregression1 = lm()
 #summary(step(linearregression))
 
+validationsetmodel = trainsetmodel[1001:2000,]
 trainsetmodel = trainsetmodel[1:1000,]
 
-#svm_tune = tune.svm(stprice~., data = trainsetmodel, 
-#                    gamma = 2^(-1:0), cost = 2^(-1:0), 
-#                    kernel = "sigmoid", type = "eps-regression")
-#print(svm_tune)
+svm_tune = tune.svm(stprice~., data = trainsetmodel, 
+                    gamma = 2^(-3:3), cost = 2^(-3:3), epsilon = 2^(-3:3), 
+                    kernel = "radial", type = "eps")
+print(svm_tune)
 
-validationsetmodel = trainsetmodel[1001:2000,]
-
-modelsvr = svm(stprice~.,data = trainsetmodel,type = "eps",cost=0.5, gamma=0.5)
+modelsvr = svm(stprice~.,data = trainsetmodel,type = "eps",cost=0.125, gamma=0.125, kernel = "radial")
 pred_result = predict(modelsvr, validationsetmodel)
-validationR2 = 1 - sum((validationsetmodel$stprice1-pred_result)^2)/sum((mean(trainsetmodel$stprice)-validationsetmodel$stprice1)^2)
+validationR2 = 1 - sum((validationsetmodel$stprice-pred_result)^2)/sum((mean(trainsetmodel$stprice)-validationsetmodel$stprice)^2)
