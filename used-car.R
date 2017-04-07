@@ -1,11 +1,12 @@
 rm(list = ls())
+library(Rcpp)
 library(dplyr)
 library(tidyverse)
 library(forcats)
 library(e1071)
-auto_new = read_table("autos.csv",header = T,sep = ",",row.names = F)
+#auto = read_table("autos.csv")
 auto =  read_csv("autos.csv")
-autosummary = read_csv("cnt_km_year_powerPS_minPrice_maxPrice_avgPrice_sdPrice.csv")
+#autosummary = read_csv("cnt_km_year_powerPS_minPrice_maxPrice_avgPrice_sdPrice.csv")
 str(auto)
 levels(auto$offerType)
 #offerType: angebot供給者(賣方) Gesuch需求者(買方)
@@ -63,12 +64,20 @@ validationsetmodel = data.frame(stprice1,stpowerPS1,stkilometer1,stad_exist_time
                                 brand = trainset$brand)
 
 trainsetY = trainset$price
-linearregression = lm(stprice~.,data = trainsetmodel)
-step(linearregression)
-linearregression1 = lm()
-summary(step(linearregression))
+#linearregression = lm(stprice~.,data = trainsetmodel)
+#step(linearregression)
+#linearregression1 = lm()
+#summary(step(linearregression))
 
+trainsetmodel = trainsetmodel[1:1000,]
 
-modelsvr = svm(stprice~.,data = trainsetmodel,type = "eps",cost=1.5)
+#svm_tune = tune.svm(stprice~., data = trainsetmodel, 
+#                    gamma = 2^(-1:0), cost = 2^(-1:0), 
+#                    kernel = "sigmoid", type = "eps-regression")
+#print(svm_tune)
+
+validationsetmodel = trainsetmodel[1001:2000,]
+
+modelsvr = svm(stprice~.,data = trainsetmodel,type = "eps",cost=0.5, gamma=0.5)
 pred_result = predict(modelsvr, validationsetmodel)
 validationR2 = 1 - sum((validationsetmodel$stprice1-pred_result)^2)/sum((mean(trainsetmodel$stprice)-validationsetmodel$stprice1)^2)
